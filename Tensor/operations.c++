@@ -35,9 +35,23 @@ public:
 
         return data[index];
     }
-    float idx(vector<float>coords){
-        
+    int idx(const vector<int> &coords)
+    {
+        int index = 0;
 
+        for (int i = 0; i < coords.size(); i++)
+        {
+            int stride = 1;
+
+            for (int j = i + 1; j < shape.size(); j++)
+            {
+                stride *= shape[j];
+            }
+
+            index += coords[i] * stride;
+        }
+
+        return index;
     }
 
     vector<int> const &dim()
@@ -60,6 +74,8 @@ int main()
     cout << my_tensor[0] << '\n';
     my_tensor[0] = 21;
     cout << my_tensor[0] << '\n';
+    int tempo=my_tensor.idx({0,0,0});
+    cout << tempo;
 
     return 0;
 }
