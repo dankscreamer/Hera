@@ -10,6 +10,7 @@ class Tensor
 {
 private:
     vector<int> shape;
+    vector<int> strides;
     vector<float> data;
 
 public:
@@ -19,14 +20,24 @@ public:
 
         int prd = 1;
 
-        for (int i = 0; i < shape.size(); i++)
+        for (int dim : shape)
         {
-            prd *= shape[i];
+            if (dim <= 0)
+                throw invalid_argument("Shape dimensions must be positive");
+
+            prd *= dim;
         }
 
-        for (int i = 1; i <= prd; i++)
+        data.resize(prd, 0.0f);
+
+        strides.resize(shape.size());
+
+        int stride = 1;
+
+        for (int i = shape.size() - 1; i >= 0; i--)
         {
-            data.push_back(0);
+            strides[i] = stride;
+            stride *= shape[i];
         }
     }
 
@@ -60,17 +71,15 @@ public:
                 throw out_of_range("Coordinate out of bounds");
             }
 
-            int stride = 1;
-
-            for (int j = i + 1; j < shape.size(); j++)
-            {
-                stride *= shape[j];
-            }
-
-            index += coords[i] * stride;
+            index += coords[i] * strides[i];
         }
 
         return index;
+    }
+
+    float &at(const vector<int> &coords)
+    {
+        return data[idx(coords)];
     }
 
     vector<int> const &dim()
@@ -105,6 +114,11 @@ int main()
 
     cout << "Linear index: "
          << index << '\n';
+
+    my_tensor.at({0, 2, 3}) = 42;
+
+    cout << "Element at {0, 2, 3}: "
+         << my_tensor.at({0, 2, 3}) << '\n';
 
     return 0;
 }
